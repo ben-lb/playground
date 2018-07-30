@@ -1,0 +1,35 @@
+{{define "layout"}}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/jquery-ui-1.12.1/jquery-ui.theme.css" />
+    <!-- The jQuery library is a prerequisite for all jqSuite products -->
+    <script type="text/ecmascript" src="/static/jqgrid/js/jquery-1.11.0.min.js"></script>
+    <!-- We support more than 40 localizations -->
+    <script type="text/ecmascript" src="/static/jqgrid/js/i18n/grid.locale-en.js"></script>
+    <!-- This is the Javascript file of jqGrid -->
+    <script type="text/ecmascript" src="/static/jqgrid/src/jquery.jqGrid.js"></script>
+    <!-- A link to a jQuery UI ThemeRoller theme, more than 22 built-in and many more custom -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- The link to the CSS that the grid needs -->
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/jqgrid/css/ui.jqgrid-bootstrap.css" />
+	<script>
+		$.jgrid.defaults.width = 780;
+	</script>
+    <!-- Main js -->
+    <script type="text/ecmascript" src="/static/testos_js/main.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <meta charset="utf-8" />
+    <title>New TestOs</title>
+</head>
+<body>
+<div style="margin-left:20px">
+    <table id="jqGrid"></table>
+    <div id="jqGridPager"></div>
+</div>
+
+    
+</body>
+</html>
+{{end}}
