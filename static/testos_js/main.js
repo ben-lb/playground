@@ -120,8 +120,10 @@ function organize_machines_data(data) {
 
 function add_machine(rows, machine) {
     let user_name = null;
-    if(machine['allocation'] !== null && machine.hasOwnProperty('user_name')) {
-        user_name = machine['user_name'];
+    let from_time = null;
+    if(machine['allocation'] !== null) {
+        if(machine.hasOwnProperty('user_name')) { user_name = machine['user_name']; }
+        from_time = machine['last_inauguration_date'];
     }
     let data = {
         'name': machine['id'],
@@ -129,8 +131,20 @@ function add_machine(rows, machine) {
         'state': machine['state'],
         'used_by': user_name,
         'labels': machine['host_label'],
-        'uptime': machine['last_inauguration_date'],
+        'uptime': calculate_uptime(from_time),
         'allocation_id': machine['allocation'],
         'vms': machine['vms']};
     rows.push(data);
+}
+
+function calculate_uptime(from_time) {
+    if(from_time === null) { return null; }
+    let now = new Date();
+    let before = new Date(from_time);
+    let time_delta_in_seconds = (now - before) / 1000;
+    if(time_delta_in_seconds < 60) { return "a few seconds"; }
+    let time_delta_in_minutes = time_delta_in_seconds / 60;
+    if(time_delta_in_minutes < 60) { return "less than 1 hour"; }
+    let time_delta_in_hours = time_delta_in_minutes / 60;
+    return parseInt(time_delta_in_hours) + " hours";
 }
