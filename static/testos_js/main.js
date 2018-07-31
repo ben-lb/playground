@@ -1,9 +1,11 @@
 const url = "http://localhost:3000/machines";
 
+setInterval(function() { set_data(); }, 3000); // refresh table evert 3 seconds
+
 $(document).ready(function () {
     $("#jqGrid").jqGrid({
         mtype: "GET",
-        url: get_data(),
+        url: set_data(),
         datatype: 'local',
         styleUI : 'Bootstrap',
         colModel: [
@@ -17,8 +19,8 @@ $(document).ready(function () {
         ],
         sortname: "name",
         viewrecords: true,
-        height: 450,
-        width: 1300,
+        height: 550,
+        width: 1500,
         rowNum: 10000,
         cmTemplate: {editable: true},
         sortable: true,
@@ -30,14 +32,14 @@ $(document).ready(function () {
 });
 
 
-function get_data() {
+function set_data() {
     $.ajax({
         type: "GET",
         datatype: 'json',
         url: url,
         success: function (data) {
-            data = organize_machines_data(data);
-            $('#jqGrid').jqGrid('setGridParam', {data: data}).trigger('reloadGrid');
+            let organized_data = organize_machines_data(data);
+            $('#jqGrid').jqGrid('clearGridData').jqGrid('setGridParam', {data: organized_data}).trigger('reloadGrid');
         }
     })
 }
