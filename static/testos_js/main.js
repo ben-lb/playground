@@ -66,7 +66,7 @@ function showChildGrid(parentRowID, parentRowKey) {
         '<div id=' + childGridPagerID + ' class=scroll></div>');
     let grid_id = "#" + childGridID;
     $(grid_id).jqGrid({
-        data: get_vms_data_by_parent_row_id(parentRowKey, grid_id),
+        data: get_vms_data_by_parent_row_id(parentRowKey),
         mtype: "GET",
         datatype: "local",
         colModel: colModelVM,
@@ -79,17 +79,15 @@ function showChildGrid(parentRowID, parentRowKey) {
 }
 
 
-function get_vms_data_by_parent_row_id(row_id, grid_id) {
+function get_vms_data_by_parent_row_id(row_id) {
     let rowData = $('#jqGrid').getLocalRow(row_id);
     let rows = [];
     for(let i = 0; i < rowData['vms'].length; i++)
     {
         let vm = rowData['vms'][i];
-        add_machine(rows, vm, false);
+        add_machine(rows, vm);
     }
     return rows;
-    // $(grid_id).jqGrid('clearGridData').jqGrid('setGridParam',
-    //     {datatype: 'local', data: rows}).trigger('reloadGrid');
 }
 
 function set_data() {
@@ -99,8 +97,8 @@ function set_data() {
         url: url,
         success: function (data) {
             let organized_data = organize_machines_data(data);
-            $('#jqGrid').jqGrid('clearGridData').jqGrid('setGridParam',
-                {datatype: 'local', data: organized_data}).trigger('reloadGrid');
+            $('#jqGrid').jqGrid('setGridParam',
+                {datatype: 'local', data: organized_data}).trigger('reloadGrid', [{current:true}]);
         }
     })
 }
@@ -113,31 +111,26 @@ function organize_machines_data(data) {
         for(let j = 0; j < rack['machines'].length; j++)
         {
             let machine = rack['machines'][j];
-            for(let k = 0; k < machine['vms'].length; k++)
-            {
-                let vm = machine['vms'][k];
-                // add_machine(rows, vm, false);
-            }
-            add_machine(rows, machine, machine['vms'].length > 0);
+            add_machine(rows, machine);
         }
 
     }
     return rows;
 }
 
-function add_machine(rows, machine, has_vms) {
+function add_machine(rows, machine) {
+    let user_name = null;
+    if(machine['allocation'] !== null && machine.hasOwnProperty('user_name')) {
+        user_name = machine['user_name'];
+    }
     let data = {
         'name': machine['id'],
         'type': machine['type'],
         'state': machine['state'],
-        'used_by': machine['user_name'],
+        'used_by': user_name,
         'labels': machine['host_label'],
         'uptime': machine['last_inauguration_date'],
         'allocation_id': machine['allocation'],
-        'vms': []};
-    if(has_vms)
-    {
-        data['vms'] = machine['vms']
-    }
+        'vms': machine['vms']};
     rows.push(data);
 }
