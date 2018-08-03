@@ -1,4 +1,5 @@
 const url = "http://localhost:3000/machines";
+var expandOnLoad = true;
 
 setInterval(function() { set_data(); }, 3000); // refresh table evert 3 seconds
 
@@ -23,12 +24,15 @@ for(let i = 0; i < colModel.length; i++)
     colModelVM.push(colModel[i]);
 }
 
+
+
 $(document).ready(function () {
     $("#jqGrid").jqGrid({
         mtype: "GET",
         url: set_data(),
         datatype: 'local',
-        styleUI : 'Bootstrap',
+        styleUI : 'bootstrap',
+        // guiStyle: "bootstrap4",
         colModel: colModel,
         sortname: "name",
         viewrecords: true,
@@ -41,8 +45,12 @@ $(document).ready(function () {
         subGrid: true,
         subGridRowExpanded: showChildGrid,
         subGridOptions : {
+            hasSubgrid: function (options) {
+					return options.data.vms.length > 0;
+				},
+
             // expand all rows on load
-            expandOnLoad: true
+            expandOnLoad: expandOnLoad
         },
         gridview: false,
         afterInsertRow: function(rowid, aData, rowelem) {
@@ -51,7 +59,13 @@ $(document).ready(function () {
                 $('tr#'+rowid, $('#jqGrid')).children("td.sgcollapsed").html("").removeClass('ui-sgcollapsed sgcollapsed');
             }
         },
+        loadComplete: function () {
+            expandOnLoad = false;
+        }
     });
+    $('#jqGrid').jqGrid('filterToolbar');
+    // $('#jqGrid').css('font-size','14px');
+
 });
 
 
