@@ -61,13 +61,24 @@ $(document).ready(function () {
         },
         loadComplete: function () {
             expandOnLoad = false;
+
+            $("#globalSearchText").autocomplete({
+                source: get_all_used_by()
+            });
         }
     });
     $('#jqGrid').jqGrid('filterToolbar');
-    // $('#jqGrid').css('font-size','14px');
-
 });
 
+
+$( function() {
+    $("#globalSearchText").keypress(function (e) {
+        var key = e.charCode || e.keyCode || 0;
+        if (key === $.ui.keyCode.ENTER) { // 13
+            alert('blabla');
+        }
+    });
+} );
 
 // the event handler on expanding parent row receives two parameters
 // the ID of the grid tow  and the primary key of the row
@@ -161,4 +172,14 @@ function calculate_uptime(from_time) {
     if(time_delta_in_minutes < 60) { return "less than 1 hour"; }
     let time_delta_in_hours = time_delta_in_minutes / 60;
     return parseInt(time_delta_in_hours) + " hours";
+}
+
+function onlyUnique(value, index, self) {
+    return self.indexOf(value) === index;
+}
+
+function get_all_used_by() {
+    let mydata = $("#jqGrid").jqGrid("getGridParam", "data")
+    let names = $.map(mydata, function (item) { return item.used_by; });
+    return names.filter(onlyUnique);
 }
