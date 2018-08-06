@@ -62,18 +62,25 @@ $(document).ready(function () {
         },
         loadComplete: function () {
             if(firstTime) {
+                firstTime = false;
                 expandOnLoad = false;
             }
-            $('#globalSearchText').empty();
-            set_all_used_by();
-            $(".chosen-select").chosen();
-            $('#globalSearchText').trigger("chosen:updated");
+            refresh_search();
         }
     });
 
 });
 
+
+function refresh_search() {
+    $('#globalSearchText').empty();
+    set_all_used_by();
+    $('#globalSearchText').trigger("chosen:updated");
+}
+
+
 $( function() {
+    $(".chosen-select").chosen();
     $( "#tabs" ).tabs({ active: "#status"});
 } );
 
@@ -189,8 +196,26 @@ function onlyUnique(value, index, self) {
 
 function set_all_used_by() {
     let mydata = $("#jqGrid").jqGrid("getGridParam", "data");
-    let names = $.map(mydata, function (item) { return item.used_by; });
+    if(mydata.length === 0) { return; }
+    let names = [];
+    for(let i = 0; i < mydata.length; i++) {
+       if(mydata[i]['vms'].length > 0) {
+           for(let j = 0; j < mydata[i]['vms'].length; j++) {
+               let vm = mydata[i]['vms'][j];
+               if(vm['user_name'] === undefined || mydata[i]['user_name'] === null) {
+                   continue;
+               }
+               names.push(vm['user_name']);
+           }
+       }
+       if(mydata[i]['used_by'] === undefined || mydata[i]['used_by'] === null) {
+           continue;
+       }
+       names.push(mydata[i]['used_by']);
+    }
+
     let filtered_names = names.filter(onlyUnique);
+    filtered_names.sort(function(a,b){return a.localeCompare(b); });
     // Add none option
     $('#globalSearchText').append($('<option>', { value: "", text : "" }));
     $.each(filtered_names, function (i, item) {
