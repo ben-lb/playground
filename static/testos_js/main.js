@@ -168,10 +168,13 @@ function calculate_uptime(from_time) {
     let before = new Date(from_time);
     let time_delta_in_seconds = (now - before) / 1000;
     if(time_delta_in_seconds < 60) { return "a few seconds"; }
+    if(time_delta_in_seconds < 60*10) { return "a few minutes"; }
     let time_delta_in_minutes = time_delta_in_seconds / 60;
     if(time_delta_in_minutes < 60) { return "less than 1 hour"; }
     let time_delta_in_hours = time_delta_in_minutes / 60;
-    return parseInt(time_delta_in_hours) + " hours";
+    if(time_delta_in_hours < 48) { return parseInt(time_delta_in_hours) + " hours"; }
+    let time_delta_in_days = time_delta_in_hours / 24;
+    return parseInt(time_delta_in_days) + " days";
 }
 
 function onlyUnique(value, index, self) {
