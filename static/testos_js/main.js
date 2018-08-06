@@ -1,5 +1,6 @@
 const url = "http://localhost:3000/machines";
-var expandOnLoad = true;
+let firstTime = true;
+let expandOnLoad = true;
 
 setInterval(function() { set_data(); }, 3000); // refresh table evert 3 seconds
 
@@ -60,16 +61,21 @@ $(document).ready(function () {
             }
         },
         loadComplete: function () {
-            expandOnLoad = false;
-
-            $("#globalSearchText").autocomplete({
-                source: get_all_used_by()
-            });
+            if(firstTime) {
+                expandOnLoad = false;
+            }
+            $('#globalSearchText').empty();
+            set_all_used_by();
+            $(".chosen-select").chosen();
+            $('#globalSearchText').trigger("chosen:updated");
         }
     });
-    $('#jqGrid').jqGrid('filterToolbar');
+
 });
 
+$( function() {
+    $( "#tabs" ).tabs({ active: "#status"});
+} );
 
 $( function() {
     $("#globalSearchText").keypress(function (e) {

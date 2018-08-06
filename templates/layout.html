@@ -7,6 +7,7 @@
 
 
     <link rel="stylesheet" type="text/css" media="screen" href="/static/jquery-ui-1.12.1.custom/jquery-ui.theme.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="/static/jquery-ui-1.12.1.custom/jquery-ui.css" />
     <link rel="stylesheet" href="/static/free-jqgrid/ui.jqgrid.min.css">
     <script src="/static/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
     <script src="/static/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
@@ -15,57 +16,67 @@
     <link href="/static/chosen/chosen.css" rel="stylesheet" />
     <script src="/static/chosen/chosen.jquery.js"></script>
 
-
-
-	<script>
-		$.jgrid.defaults.width = 780;
-	</script>
+    <script>
+        $.jgrid.defaults.width = 780;
+    </script>
     <!-- Main js -->
     <script type="text/ecmascript" src="/static/testos_js/main.js"></script>
     <meta charset="utf-8" />
     <title>BenTos</title>
 </head>
 <body>
-<table style="width: 100%">
-    <tr>
-        <div>
-            <label for="globalSearchText">Search:&nbsp;</label>
-            <select id="globalSearchText" class="chosen-select" type="text"/>&nbsp;
-        </div>
-    </tr>
-    <tr>
-        <button id="testButton" class="ui-button ui-widget ui-corner-all">Click Me</button>
-    </tr>
-    <tr>
-        <div style="margin-left:20px">
-            <style>
-                .ui-jqgrid tr.jqgrow td {font-size:1.3em}
 
-                .ui-jqgrid tr.jqgroup td {
-                    font-weight: bold;
-                    font-size: 12px;
-                }
+<div id="tabs">
+    <ul>
+        <li><a href="#status">Show Systems</a></li>
+        <li><a href="#run_mode">Run Mode</a></li>
+    </ul>
 
-                .ui-jqgrid .ui-th-column > div.ui-jqgrid-sortable {
-                    font-size: 17px;
-                }
+    <div id="status">
+        <table style="width: 100%">
+            <tr>
+                <div>
+                    <label for="globalSearchText">Search:&nbsp;</label>
+                    <select id="globalSearchText" class="chosen-select" type="text"/>&nbsp;
+                </div>
+            </tr>
+            <tr>
+                <div style="margin-left:20px">
+                    <style>
+                        .ui-jqgrid tr.jqgrow td {font-size:1.3em}
 
-                span.ui-jqgrid-cell-wrapper {
-                    font-size: 16px;
-                }
+                        .ui-jqgrid tr.jqgroup td {
+                            font-weight: bold;
+                            font-size: 12px;
+                        }
+
+                        .ui-jqgrid .ui-th-column > div.ui-jqgrid-sortable {
+                            font-size: 17px;
+                        }
+
+                        span.ui-jqgrid-cell-wrapper {
+                            font-size: 16px;
+                        }
 
 
-                td.jqgrid-rownum {
-                    font-size: 15px;
-                }
-            </style>
-            <table id="jqGrid"></table>
-            <div id="jqGridPager"></div>
-        </div>
-    </tr>
-</table>
-
-    
+                        td.jqgrid-rownum {
+                            font-size: 15px;
+                        }
+                    </style>
+                    <table id="jqGrid"></table>
+                    <div id="jqGridPager"></div>
+                </div>
+            </tr>
+        </table>
+    </div>
+    <div id="run_mode">
+        <table style="width: 100%">
+            <tr>
+                <button id="testButton" class="ui-button ui-widget ui-corner-all">Click Me</button>
+            </tr>
+        </table>
+    </div>
+</div>
 </body>
 </html>
 {{end}}
