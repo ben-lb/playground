@@ -3,6 +3,7 @@ var expandOnLoad = true;
 
 setInterval(function() { set_data(); }, 3000); // refresh table evert 3 seconds
 
+
 const colModel = [
     { label: 'Name', name: 'name', key: true, width: 130 },
     { label: 'Type', name: 'type', width: 100 },
@@ -32,7 +33,6 @@ $(document).ready(function () {
         url: set_data(),
         datatype: 'local',
         styleUI : 'bootstrap',
-        // guiStyle: "bootstrap4",
         colModel: colModel,
         sortname: "name",
         viewrecords: true,
@@ -178,8 +178,13 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-function get_all_used_by() {
-    let mydata = $("#jqGrid").jqGrid("getGridParam", "data")
+function set_all_used_by() {
+    let mydata = $("#jqGrid").jqGrid("getGridParam", "data");
     let names = $.map(mydata, function (item) { return item.used_by; });
-    return names.filter(onlyUnique);
+    let filtered_names = names.filter(onlyUnique);
+    // Add none option
+    $('#globalSearchText').append($('<option>', { value: "", text : "" }));
+    $.each(filtered_names, function (i, item) {
+        $('#globalSearchText').append($('<option>', { value: item, text : item }));
+    });
 }

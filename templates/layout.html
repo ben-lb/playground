@@ -3,11 +3,19 @@
 
 <html lang="en">
 <head>
+
+
+
     <link rel="stylesheet" type="text/css" media="screen" href="/static/jquery-ui-1.12.1.custom/jquery-ui.theme.css" />
     <link rel="stylesheet" href="/static/free-jqgrid/ui.jqgrid.min.css">
     <script src="/static/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
     <script src="/static/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
     <script src="/static/free-jqgrid/jquery.jqgrid.min.js"></script>
+    <link href="/static/chosen/docsupport/style.css" rel="stylesheet" />
+    <link href="/static/chosen/chosen.css" rel="stylesheet" />
+    <script src="/static/chosen/chosen.jquery.js"></script>
+
+
 
 	<script>
 		$.jgrid.defaults.width = 780;
@@ -22,8 +30,11 @@
     <tr>
         <div>
             <label for="globalSearchText">Search:&nbsp;</label>
-            <input id="globalSearchText" type="text">&nbsp;
+            <select id="globalSearchText" class="chosen-select" type="text"/>&nbsp;
         </div>
+    </tr>
+    <tr>
+        <button id="testButton" class="ui-button ui-widget ui-corner-all">Click Me</button>
     </tr>
     <tr>
         <div style="margin-left:20px">
