@@ -25,7 +25,7 @@ func getMachines(w http.ResponseWriter, req *http.Request) {
     url := "http://labgw:8080/machines"
 
 	spaceClient := http.Client{
-		Timeout: time.Second * 2, // Maximum of 2 secs
+		Timeout: time.Second * 5, // Maximum of 2 secs
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
