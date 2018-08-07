@@ -51,13 +51,18 @@ $(document).ready(function () {
 				},
 
             // expand all rows on load
-            expandOnLoad: expandOnLoad
+            expandOnLoad: expandOnLoad,
         },
         gridview: false,
         afterInsertRow: function(rowid, aData, rowelem) {
             let rowData = $('#jqGrid').getLocalRow(rowid);
+
+            // If this is a regular row (doesn't have a subgrid)
             if(rowData['vms'].length === 0){
-                $('tr#'+rowid, $('#jqGrid')).children("td.sgcollapsed").html("").removeClass('ui-sgcollapsed sgcollapsed');
+                $("#"+rowid).find("td").css("background-color", "Lavender");
+            }
+            else { // A row with a subgrid
+                $("#"+rowid).find("td").css("background-color", "lightGrey");
             }
         },
         loadComplete: function () {
@@ -66,6 +71,9 @@ $(document).ready(function () {
                 expandOnLoad = false;
             }
             refresh_search();
+        },
+        ondblClickRow: function (rowid) {
+            $(this).jqGrid("toggleSubGridRow", rowid);
         }
     });
 
@@ -112,7 +120,11 @@ function showChildGrid(parentRowID, parentRowKey) {
         sortname: 'name',
         width: 1400,
         height: '100%',
+        afterInsertRow: function(rowid, aData, rowelem) {
+            $("#"+rowid).find("td").css("background-color", "lightBlue");
+        },
     });
+    $('#jqGrid').jqGrid("hideCol", "subgrid");
 
 }
 
