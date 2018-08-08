@@ -1,6 +1,7 @@
 const url = "http://localhost:3000/machines";
 let firstTime = true;
 let expandOnLoad = true;
+let username = "";
 
 setInterval(function() { set_data(); }, 3000); // refresh table evert 3 seconds
 
@@ -37,7 +38,7 @@ $(document).ready(function () {
         colModel: colModel,
         sortname: "name",
         viewrecords: true,
-        height: '100%',
+        height: 'auto',
         width: 1500,
         rowNum: 10000,
         cmTemplate: {editable: true},
@@ -59,6 +60,7 @@ $(document).ready(function () {
 
             // If this is a regular row (doesn't have a subgrid)
             if(rowData['vms'].length === 0){
+                $('tr#'+rowid, $('#jqGrid')).children("td.sgcollapsed").html("").removeClass('ui-sgcollapsed sgcollapsed');
                 $("#"+rowid).find("td").css("background-color", "Lavender");
             }
             else { // A row with a subgrid
@@ -93,11 +95,38 @@ $( function() {
 } );
 
 $( function() {
+    $('#clearSearch').click( function (event) {
+        $("#globalSearchText").val('').trigger('chosen:updated');
+        username = "";
+        $("#jqGrid").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").show();
+        $('#jqGrid').trigger('reloadGrid', [{current:true}]);
+    });
+
+    $('#testButton').click( function (event) {
+        $.ajax({
+            type: "GET",
+            datatype: 'text',
+            url: "http://localhost:3000/test",
+            success: function (data) {
+                alert(data);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                // alert(xhr.responseText);
+                alert(thrownError);
+            }
+        })
+    });
+
     $("#globalSearchText").keypress(function (e) {
         var key = e.charCode || e.keyCode || 0;
         if (key === $.ui.keyCode.ENTER) { // 13
-            alert('blabla');
+            filter_by_user();
         }
+    });
+
+    $('#globalSearchText').on('change', function() {
+        username = this.value;
+        filter_by_user();
     });
 } );
 
@@ -146,11 +175,13 @@ function set_data() {
         datatype: 'json',
         url: url,
         success: function (data) {
+            $('#globalSearchText').val(username).trigger("chosen:updated");
             let organized_data = organize_machines_data(data);
             $('#jqGrid').jqGrid('setGridParam',
                 {datatype: 'local', data: organized_data}).trigger('reloadGrid', [{current:true}]);
         }
-    })
+    });
+    filter_by_user();
 }
 
 function organize_machines_data(data) {
@@ -233,4 +264,49 @@ function set_all_used_by() {
     $.each(filtered_names, function (i, item) {
         $('#globalSearchText').append($('<option>', { value: item, text : item }));
     });
+}
+
+function filter_by_user() {
+    let mydata = $("#jqGrid").jqGrid("getGridParam", "data");
+    if(mydata === null) { return; }
+    let hideCountMainGrid = 0;
+    for(let i = 0; i < mydata.length; i++) {
+        let vms = mydata[i]['vms'];
+        let hideCountSubGrid = 0;
+        let subGridId = '#jqGrid_' + mydata[i].name;
+        for(let j = 0; j < vms.length   ; j++) {
+            let vm = mydata[i]['vms'][j];
+            // hide/show subgrid rows
+            if(vm['user_name'] === undefined || vm['user_name'] !== username) {
+                $('#' + vm.id).hide();
+                hideCountSubGrid++;
+            }
+            else {
+                $('#' + vm.id).show();
+            }
+        }
+        // hide/show column row for subgrid if needed
+        if(vms.length === hideCountSubGrid && hideCountSubGrid > 0) {
+            $(subGridId).closest("tr.ui-widget-content").hide()
+        }
+        else if (vms.length > 0) {
+            $(subGridId).closest("tr.ui-widget-content").show()
+        }
+
+        // hide/show main grid rows
+        if(mydata[i]['used_by'] === undefined || mydata[i]['used_by'] !== username) {
+            $('#' + mydata[i].name).hide();
+            hideCountMainGrid++;
+        }
+        else {
+            $('#' + mydata[i].name).show();
+        }
+        if(hideCountMainGrid === mydata.length) {
+            $("#jqGrid").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").hide();
+        }
+        else {
+            $("#jqGrid").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").show();
+        }
+    }
+
 }
