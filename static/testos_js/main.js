@@ -2,6 +2,7 @@ const url = "http://localhost:3000/machines";
 let firstTime = true;
 let expandOnLoad = true;
 let username = "";
+let hidden_rows_ids = [];
 
 setInterval(function() { set_data(); }, 3000); // refresh table evert 3 seconds
 
@@ -15,7 +16,7 @@ const colModel = [
     { label: 'Labels', name: 'labels', width: 350 },
     { label: 'Uptime', name: 'uptime', width: 150 },
     { label: 'Allocation ID', name: 'allocation_id', width: 250 },
-]
+];
 
 
 let colModelVM = [];
@@ -48,7 +49,7 @@ $(document).ready(function () {
         subGridRowExpanded: showChildGrid,
         subGridOptions : {
             hasSubgrid: function (options) {
-					return options.data.vms.length > 0;
+    					return options.data.vms.length > 0;
 				},
 
             // expand all rows on load
@@ -98,6 +99,7 @@ $( function() {
     $('#clearSearch').click( function (event) {
         $("#globalSearchText").val('').trigger('chosen:updated');
         username = "";
+        hidden_rows_ids = [];
         $("#jqGrid").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").show();
         $('#jqGrid').trigger('reloadGrid', [{current:true}]);
     });
@@ -115,13 +117,6 @@ $( function() {
                 alert(thrownError);
             }
         })
-    });
-
-    $("#globalSearchText").keypress(function (e) {
-        var key = e.charCode || e.keyCode || 0;
-        if (key === $.ui.keyCode.ENTER) { // 13
-            filter_by_user();
-        }
     });
 
     $('#globalSearchText').on('change', function() {
@@ -175,13 +170,13 @@ function set_data() {
         datatype: 'json',
         url: url,
         success: function (data) {
-            $('#globalSearchText').val(username).trigger("chosen:updated");
             let organized_data = organize_machines_data(data);
-            $('#jqGrid').jqGrid('setGridParam',
-                {datatype: 'local', data: organized_data}).trigger('reloadGrid', [{current:true}]);
+            var grid = $('#jqGrid').jqGrid("getGridParam");
+            grid.data = organized_data;
+            $('#jqGrid').trigger('reloadGrid', [{current:true}]);
+            $('#globalSearchText').val(username).trigger("chosen:updated");
         }
     });
-    filter_by_user();
 }
 
 function organize_machines_data(data) {
@@ -194,12 +189,35 @@ function organize_machines_data(data) {
             let machine = rack['machines'][j];
             add_machine(rows, machine);
         }
-
     }
     return rows;
 }
 
+function containsObject(obj, list) {
+    for (let i = 0; i < list.length; i++) {
+        if (list[i] === obj) {
+            return true;
+        }
+    }
+    return false;
+}
+
 function add_machine(rows, machine) {
+    if(containsObject(machine['id'], hidden_rows_ids))
+    {
+        // If this row contains vms array and at least one of them should be visible,
+        // then this row should be visible as well
+        let hide = true;
+        for(let i = 0; machine['vms'] !== undefined && i < machine['vms'].length; i++) {
+            let vm_name = machine['vms'][i]['id'];
+            if(!containsObject(vm_name, hidden_rows_ids)) {
+                hide = false;
+                break;
+            }
+        }
+        if(hide) { return; } // hide this row
+    }
+
     let user_name = null;
     let from_time = null;
     if(machine['allocation'] !== null) {
@@ -270,6 +288,7 @@ function filter_by_user() {
     let mydata = $("#jqGrid").jqGrid("getGridParam", "data");
     if(mydata === null) { return; }
     let hideCountMainGrid = 0;
+    hidden_rows_ids = [];
     for(let i = 0; i < mydata.length; i++) {
         let vms = mydata[i]['vms'];
         let hideCountSubGrid = 0;
@@ -280,6 +299,7 @@ function filter_by_user() {
             if(vm['user_name'] === undefined || vm['user_name'] !== username) {
                 $('#' + vm.id).hide();
                 hideCountSubGrid++;
+                hidden_rows_ids.push(vm.id);
             }
             else {
                 $('#' + vm.id).show();
@@ -297,6 +317,7 @@ function filter_by_user() {
         if(mydata[i]['used_by'] === undefined || mydata[i]['used_by'] !== username) {
             $('#' + mydata[i].name).hide();
             hideCountMainGrid++;
+            hidden_rows_ids.push(mydata[i].name);
         }
         else {
             $('#' + mydata[i].name).show();
@@ -308,5 +329,4 @@ function filter_by_user() {
             $("#jqGrid").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").show();
         }
     }
-
 }
