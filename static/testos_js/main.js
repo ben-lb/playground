@@ -141,7 +141,7 @@ $(function () {
 
 
 $( function() {
-    $(".chosen-select").chosen();
+    $(".chosen-select").chosen({width:"25em", enable_split_word_search: true, search_contains: true});
     $( "#tabs" ).tabs();
     $('.nav-tabs > li > a').click(function(event){
         event.preventDefault();//stop browser to take action for clicked anchor
@@ -165,6 +165,7 @@ $( function() {
         $(target_tab_selector).removeClass('hide');
         $(target_tab_selector).addClass('active');
     });
+    populate_rootfs_types();
 } );
 
 
@@ -415,3 +416,20 @@ function filter_by_user() {
         }
     }
 }
+
+function populate_rootfs_types() {
+    $.ajax({
+        type: "GET",
+        datatype: 'json',
+        url: "http://localhost:3000/get_rootfs_list",
+        success: function (data) {
+            $('#rootfsType').append($('<option>', { value: "", text : "" }));
+            $.each(data, function (i, item) {
+                $('#rootfsType').append($('<option>', { value: item, text : item }));
+            });
+            $("#rootfsType").prepend("<option value='' selected='selected'>&nbsp;</option>");
+            $('#rootfsType').trigger("chosen:updated");
+        }
+    });
+}
+

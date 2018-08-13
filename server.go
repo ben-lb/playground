@@ -24,6 +24,7 @@ func main() {
 	http.HandleFunc("/ssh", ssh)
 	http.HandleFunc("/serial", serial)
 	http.HandleFunc("/run_test", runTest)
+	http.HandleFunc("/get_rootfs_list", getRootfsList)
 
 	log.Println("Listening...")
 	http.ListenAndServe(":3000", nil)
@@ -207,6 +208,26 @@ func getMachines(w http.ResponseWriter, req *http.Request) {
 	output, err := json.Marshal(msg)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
+		return
+	}
+	w.Header().Set("content-type", "application/json")
+	w.Write(output)
+}
+
+func getRootfsList(w http.ResponseWriter, r *http.Request) {
+	cmd := fmt.Sprintf("grep rootfs_.*: %s/rootfs/lb.yaml | rev | cut -c 2- | rev ", os.Getenv("WORKSPACE_TOP"))
+	res, err := runCmd(cmd)
+	if err != "" {
+		http.Error(w, err, 500)
+		return
+	}
+	var rootfsList []string
+	for _, rfs := range strings.Split(res, "\n") {
+		rootfsList = append(rootfsList, strings.ToUpper(strings.TrimSpace(rfs)))
+	}
+	output, err2 := json.Marshal(rootfsList)
+	if err2 != nil {
+		http.Error(w, err2.Error(), 500)
 		return
 	}
 	w.Header().Set("content-type", "application/json")
