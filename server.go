@@ -8,18 +8,113 @@ import (
 	"path/filepath"
 	"time"
 	"io/ioutil"
-		"encoding/json"
-	)
+	"encoding/json"
+	"os/exec"
+	"bytes"
+	"fmt"
+)
 
 func main() {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", serveTemplate)
 	http.HandleFunc("/machines", getMachines)
+	http.HandleFunc("/ssh", ssh)
+	http.HandleFunc("/serial", serial)
 
 	log.Println("Listening...")
 	http.ListenAndServe(":3000", nil)
 }
+
+func isCommandAvailable(name string) bool {
+	cmd := exec.Command("/bin/sh", "-c", "command -v " + name)
+	if err := cmd.Run(); err != nil {
+		return false
+	}
+	return true
+}
+
+func runCmd(cmdStr string) (string, string) {
+	cmd := exec.Command("/bin/sh", "-c", cmdStr)
+	//additionalEnv := "INTERACTIVE=FALSE"
+    //newEnv := append(os.Environ(), additionalEnv)
+    //cmd.Env = newEnv
+    var out, stderr bytes.Buffer
+    cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(fmt.Sprint(err) + ": " + stderr.String())
+	}
+	fmt.Println("Result: " + out.String())
+	return out.String(), stderr.String()
+}
+
+func ssh(w http.ResponseWriter, r *http.Request) {
+	if !isCommandAvailable("sshpass") {
+		http.Error(w, "sshpass is not installed on your computer", http.StatusInternalServerError)
+		return
+	}
+	if !isCommandAvailable("gnome-terminal") {
+		http.Error(w, "gnome-terminal is not installed on your computer", http.StatusInternalServerError)
+		return
+	}
+	type reqBody struct {
+		Hostname string
+	}
+	var body reqBody
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+    }
+
+	var resErr string
+	cmd := fmt.Sprintf("gnome-terminal -- sh -c 'sshpass -p 'light' ssh -o StrictHostKeyChecking=no root@%s'", body.Hostname)
+	stdout, resErr := runCmd(cmd)
+	//stdout, err := runCmd("dockerize testos_cli --uri tcp://labgw:22222 -t virtual -r rootfs_product_centos")
+	if resErr != "" {
+		log.Println(resErr)
+	}
+	// create json response from struct
+	a, err := json.Marshal(stdout)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+    }
+    w.Write(a)
+}
+
+func serial(w http.ResponseWriter, r *http.Request) {
+	if !isCommandAvailable("gnome-terminal") {
+		http.Error(w, "gnome-terminal is not installed on your computer", http.StatusInternalServerError)
+		return
+	}
+	type reqBody struct {
+		Hostname string
+	}
+	var body reqBody
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+
+	var resErr string
+	cmd := fmt.Sprintf("gnome-terminal -- sh -c 'dockerize serialf %s; bash'", body.Hostname)
+	stdout, resErr := runCmd(cmd)
+	if resErr != "" {
+		log.Println(resErr)
+	}
+	// create json response from struct
+	a, err := json.Marshal(stdout)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+    w.Write(a)
+}
+
 
 func getMachines(w http.ResponseWriter, req *http.Request) {
     url := "http://labgw:8080/machines"

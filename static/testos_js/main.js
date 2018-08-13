@@ -49,8 +49,8 @@ $(document).ready(function () {
         subGridRowExpanded: showChildGrid,
         subGridOptions : {
             hasSubgrid: function (options) {
-    					return options.data.vms.length > 0;
-				},
+                return options.data.vms.length > 0;
+            },
 
             // expand all rows on load
             expandOnLoad: expandOnLoad,
@@ -95,9 +95,21 @@ function handle_context_menu() {
                     dataType: "json",
                     data: JSON.stringify(data),
                     contentType: "application/json; charset=utf-8",
-                    success: function (data) {
-                        alert(data);
-                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        // alert(xhr.responseText);
+                        alert(thrownError);
+                    }
+                });
+            },
+            'serial': function(trigger) {
+                // trigger is the DOM element ("tr.jqgrow") which are triggered
+                var data = {'hostname': trigger.id};
+                $.ajax({
+                    url: "http://localhost:3000/serial",
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
                     error: function (xhr, ajaxOptions, thrownError) {
                         // alert(xhr.responseText);
                         alert(thrownError);
@@ -106,9 +118,9 @@ function handle_context_menu() {
             },
         },
         onContextMenu: function(event/*, menu*/) {
-            var rowId = $(event.target).closest("tr.jqgrow").attr("id");
-            // disable menu for rows with even rowids
-            $('#ssh').attr("disabled",Number(rowId)%2 === 0);
+            // var rowId = $(event.target).closest("tr.jqgrow").attr("id");
+            // // disable menu for rows with even rowids
+            // $('#ssh').attr("disabled",Number(rowId)%2 === 0);
             return true;
         }
     });
@@ -319,19 +331,19 @@ function set_all_used_by() {
     if(mydata.length === 0) { return; }
     let names = [];
     for(let i = 0; i < mydata.length; i++) {
-       if(mydata[i]['vms'].length > 0) {
-           for(let j = 0; j < mydata[i]['vms'].length; j++) {
-               let vm = mydata[i]['vms'][j];
-               if(vm['user_name'] === undefined || mydata[i]['user_name'] === null) {
-                   continue;
-               }
-               names.push(vm['user_name']);
-           }
-       }
-       if(mydata[i]['used_by'] === undefined || mydata[i]['used_by'] === null) {
-           continue;
-       }
-       names.push(mydata[i]['used_by']);
+        if(mydata[i]['vms'].length > 0) {
+            for(let j = 0; j < mydata[i]['vms'].length; j++) {
+                let vm = mydata[i]['vms'][j];
+                if(vm['user_name'] === undefined || mydata[i]['user_name'] === null) {
+                    continue;
+                }
+                names.push(vm['user_name']);
+            }
+        }
+        if(mydata[i]['used_by'] === undefined || mydata[i]['used_by'] === null) {
+            continue;
+        }
+        names.push(mydata[i]['used_by']);
     }
 
     let filtered_names = names.filter(onlyUnique);
