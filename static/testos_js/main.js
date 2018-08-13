@@ -74,6 +74,7 @@ $(document).ready(function () {
                 expandOnLoad = false;
             }
             refresh_search();
+            handle_context_menu();
         },
         ondblClickRow: function (rowid) {
             $(this).jqGrid("toggleSubGridRow", rowid);
@@ -81,6 +82,37 @@ $(document).ready(function () {
     });
 
 });
+
+function handle_context_menu() {
+    $(".jqgrow", "#jqGrid").contextMenu('machineContextMenu', {
+        bindings: {
+            'ssh': function(trigger) {
+                // trigger is the DOM element ("tr.jqgrow") which are triggered
+                var data = {'hostname': trigger.id};
+                $.ajax({
+                    url: "http://localhost:3000/ssh",
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        alert(data);
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        // alert(xhr.responseText);
+                        alert(thrownError);
+                    }
+                });
+            },
+        },
+        onContextMenu: function(event/*, menu*/) {
+            var rowId = $(event.target).closest("tr.jqgrow").attr("id");
+            // disable menu for rows with even rowids
+            $('#ssh').attr("disabled",Number(rowId)%2 === 0);
+            return true;
+        }
+    });
+}
 
 
 function refresh_search() {
@@ -117,13 +149,18 @@ $( function() {
     });
 } );
 
+
+function clear_search() {
+    $("#globalSearchText").val('').trigger('chosen:updated');
+    username = "";
+    hidden_rows_ids = [];
+    $("#jqGrid").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").show();
+    $('#jqGrid').trigger('reloadGrid', [{current:true}]);
+}
+
 $( function() {
     $('#clearSearch').click( function (event) {
-        $("#globalSearchText").val('').trigger('chosen:updated');
-        username = "";
-        hidden_rows_ids = [];
-        $("#jqGrid").parents("div.ui-jqgrid-view").children("div.ui-jqgrid-hdiv").show();
-        $('#jqGrid').trigger('reloadGrid', [{current:true}]);
+        clear_search();
     });
 
     $('#testButton').click( function (event) {
