@@ -134,6 +134,12 @@ function refresh_search() {
 }
 
 
+$(function () {
+    $('input[type="checkbox"]').bootstrapToggle();
+    $('input').addClass("ui-widget ui-widget-content ui-corner-all");
+});
+
+
 $( function() {
     $(".chosen-select").chosen();
     $( "#tabs" ).tabs();
@@ -175,11 +181,19 @@ $( function() {
         clear_search();
     });
 
-    $('#testButton').click( function (event) {
+    $('#runTestButton').click( function (event) {
+        var data = {
+            Pylint: $('#pylint').prop('checked'),
+            Debug: $('#debug').prop('checked'),
+            TestFilePath: $('#testFilePath').val(),
+            RootfsType: $('#rootfsType').val(),
+            RootfsLabel: $('#rootfsLabel').val(),
+        };
         $.ajax({
-            type: "GET",
-            datatype: 'text',
-            url: "http://localhost:3000/test",
+            type: "POST",
+            datatype: 'json',
+            url: "http://localhost:3000/run_test",
+            data: JSON.stringify(data),
             success: function (data) {
                 alert(data);
             },

@@ -12,6 +12,8 @@ import (
 	"os/exec"
 	"bytes"
 	"fmt"
+	"strings"
+	"path"
 )
 
 func main() {
@@ -21,6 +23,7 @@ func main() {
 	http.HandleFunc("/machines", getMachines)
 	http.HandleFunc("/ssh", ssh)
 	http.HandleFunc("/serial", serial)
+	http.HandleFunc("/run_test", runTest)
 
 	log.Println("Listening...")
 	http.ListenAndServe(":3000", nil)
@@ -115,12 +118,61 @@ func serial(w http.ResponseWriter, r *http.Request) {
     w.Write(a)
 }
 
+func runTest(w http.ResponseWriter, r *http.Request) {
+	if !isCommandAvailable("gnome-terminal") {
+		http.Error(w, "gnome-terminal is not installed on your computer", http.StatusInternalServerError)
+		return
+	}
+	type reqBody struct {
+		Pylint bool
+		Debug bool
+		TestFilePath string
+		RootfsType string
+		RootfsLabel string
+	}
+	var body reqBody
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+
+	var resErr string
+	workspace := os.Getenv("WORKSPACE_TOP")
+	relPath := strings.TrimPrefix(body.TestFilePath, workspace)
+	subDir := strings.Split(relPath, "/")[1]
+	newSubPath := path.Join(workspace, subDir)
+	rackTestPath := strings.TrimPrefix(body.TestFilePath, newSubPath)[1:]
+	var pylint, debug, rootfs string
+	if body.Pylint {
+		pylint = "--pylint"
+	}
+	if body.Debug {
+		debug = "--debug"
+	}
+	if body.RootfsType != "" && body.RootfsLabel != "" {
+		rootfs = fmt.Sprintf("%s=%s", body.RootfsType, body.RootfsLabel)
+	}
+
+	cmd := fmt.Sprintf("gnome-terminal -- sh -c 'cd %s; %s dockerize run_test.sh %s %s %s; bash'", newSubPath,
+		rootfs, rackTestPath, pylint, debug)
+	stdout, resErr := runCmd(cmd)
+	if resErr != "" {
+		log.Println(resErr)
+	}
+	// create json response from struct
+	a, err := json.Marshal(stdout)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+    w.Write(a)
+}
 
 func getMachines(w http.ResponseWriter, req *http.Request) {
     url := "http://labgw:8080/machines"
 
 	spaceClient := http.Client{
-		Timeout: time.Second * 5, // Maximum of 2 secs
+		Timeout: time.Second * 10, // Maximum of 10 secs
 	}
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)

@@ -17,6 +17,12 @@
     <link href="/static/chosen/chosen.css" rel="stylesheet" />
     <script src="/static/chosen/chosen.jquery.js"></script>
 
+    <script src="/static/bootstrap/bootstrap.min.js"></script>
+    <link href="/static/bootstrap/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/bootstrap-toggle-master/css/bootstrap-toggle.min.css">
+    <script src="/static/bootstrap-toggle-master/js/bootstrap-toggle.min.js"></script>
+
+
     <script>
         $.jgrid.defaults.width = 780;
     </script>
@@ -123,7 +129,7 @@
                 <tr>
                     <td>
                         <div>
-                            <label for="globalSearchText">Search:&nbsp;</label>
+                            <label for="globalSearchText">Search:&nbsp</label>
                             <select id="globalSearchText" class="chosen-select" type="text"></select>
                         </div>
                     </td>
@@ -176,10 +182,49 @@
     </section>
     <section id="run_mode" class="tab-content hide">
         <div>
-            <table style="width: 100%">
+            <br>
+            <style type="text/css">
+                td, th
+                {
+                    padding:0 15px 0 15px;
+                    text-align: left
+                }
+                tr.spaceUnder>td {
+                    padding-bottom: 1em;
+                }
+            </style>
+            <table>
+                <tr>
+                    <th>Pylint:</th>
+                    <th>Debug:</th>
+                </tr>
+                <tr class="spaceUnder">
+                    <td>
+                        <input type="checkbox" id="pylint" data-toggle="toggle">
+                    </td>
+                    <td>
+                        <input type="checkbox" id="debug" data-toggle="toggle">
+                    </td>
+                </tr>
+                <tr>
+                    <th>File full path:</th>
+                    <th>RootFS Type:</th>
+                    <th>RootFS Label:</th>
+                </tr>
+                <tr class="spaceUnder">
+                    <td>
+                        <input type="text" id="testFilePath" style="width: 500px">
+                    </td>
+                    <td>
+                        <input type="text" id="rootfsType" style="width: 300px">
+                    </td>
+                    <td>
+                        <input type="text" id="rootfsLabel" style="width: 300px">
+                    </td>
+                </tr>
                 <tr>
                     <td>
-                        <button id="testButton" class="ui-button ui-widget ui-corner-all">Click Me</button>
+                        <button id="runTestButton" class="ui-button ui-widget ui-corner-all">Run Test</button>
                     </td>
                 </tr>
             </table>
