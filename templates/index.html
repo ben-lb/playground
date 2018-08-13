@@ -1,4 +1,4 @@
-{{define "layout"}}
+{{define "index"}}
 <!DOCTYPE html>
 
 <html lang="en">
@@ -10,6 +10,7 @@
     <link rel="stylesheet" type="text/css" media="screen" href="/static/jquery-ui-1.12.1.custom/jquery-ui.css" />
     <link rel="stylesheet" href="/static/free-jqgrid/ui.jqgrid.min.css">
     <script src="/static/jquery-ui-1.12.1.custom/external/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/static/jquery-ui-1.12.1.custom/jquery.contextmenu.js"></script>
     <script src="/static/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
     <script src="/static/free-jqgrid/jquery.jqgrid.min.js"></script>
     <link href="/static/chosen/docsupport/style.css" rel="stylesheet" />
@@ -152,9 +153,21 @@
                             td.jqgrid-rownum {
                                 font-size: 15px;
                             }
+                            span.contextMenu {
+                                font-size: 14px;
+                            }
                         </style>
                         <table id="jqGrid"></table>
                         <div id="jqGridPager"></div>
+                        <div class="contextMenu" id="machineContextMenu" style="display:none">
+                            <ul style="width: 200px">
+                                <li id="ssh">
+                                    <span>Open SSH</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div id="terminal"></div>
+
                     </div>
                 </tr>
             </table>

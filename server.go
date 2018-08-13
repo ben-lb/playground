@@ -67,7 +67,7 @@ func getMachines(w http.ResponseWriter, req *http.Request) {
 }
 
 func serveTemplate(w http.ResponseWriter, r *http.Request) {
-	lp := filepath.Join("templates", "layout.html")
+	lp := filepath.Join("templates", "index.html")
 	fp := filepath.Join("templates", filepath.Clean(r.URL.Path))
 
 	// Return a 404 if the template doesn't exist
@@ -94,7 +94,7 @@ func serveTemplate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := tmpl.ExecuteTemplate(w, "layout", nil); err != nil {
+	if err := tmpl.ExecuteTemplate(w, "index", nil); err != nil {
 		log.Println(err.Error())
 		http.Error(w, http.StatusText(500), 500)
 	}
