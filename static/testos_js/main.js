@@ -118,14 +118,30 @@ function handle_context_menu() {
             },
         },
         onContextMenu: function(event/*, menu*/) {
-            // var rowId = $(event.target).closest("tr.jqgrow").attr("id");
-            // // disable menu for rows with even rowids
-            // $('#ssh').attr("disabled",Number(rowId)%2 === 0);
+            let rowId = $(event.target).closest("tr.jqgrow").attr("id");
+            let subGridId = get_grid_id_by_row_id(rowId);
+            let rowData = $(subGridId).getLocalRow(rowId);
+
+            if(rowData['state'] !== 'inaugurated') {
+                $('#ssh').attr("disabled","disabled").addClass('ui-state-disabled');
+            } else {
+                $('#ssh').removeAttr("disabled").removeClass('ui-state-disabled');
+            }
+            if(rowData['state'] === 'checked_in') {
+                $('#serial').attr("disabled","disabled").addClass('ui-state-disabled');
+            } else {
+                $('#serial').removeAttr("disabled").removeClass('ui-state-disabled');
+            }
             return true;
         }
     });
 }
 
+function get_grid_id_by_row_id(rowId) {
+    let strArr = rowId.split('-');
+    if(strArr.length < 3) { return '#jqGrid'; }
+    return "#jqGrid_" + strArr[0] + "-" + strArr[1] + "_table";
+}
 
 function refresh_search() {
     $('#globalSearchText').empty();
